@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: "bi_bold";
+    src: url("./fonts/bi.otf");
+}
+
+@font-face {
+    font-family: "mo";
+    src: url("./fonts/mo.ttf");
+}

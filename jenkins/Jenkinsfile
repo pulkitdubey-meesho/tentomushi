@@ -1,0 +1,49 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = "localhost:5000/tentomushi-frontend"
+        DEPLOY_REPO = "git@github.com:youruser/tentomushi-deploy.git"
+        BRANCH = "main"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/youruser/tentomushi.git', branch: "${BRANCH}"
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build("${IMAGE_NAME}:${BUILD_NUMBER}")
+                }
+            }
+        }
+
+        stage('Push to Local Registry') {
+            steps {
+                script {
+                    docker.image("${IMAGE_NAME}:${BUILD_NUMBER}").push()
+                }
+            }
+        }
+
+        stage('Update Manifests Repo') {
+            steps {
+                sshagent(['your-github-ssh-key']) {
+                    sh '''
+                    git clone ${DEPLOY_REPO}
+                    cd tentomushi-deploy
+                    sed -i "s|image: .*|image: ${IMAGE_NAME}:${BUILD_NUMBER}|" manifests/deployment.yaml
+                    git config user.name "Jenkins"
+                    git config user.email "jenkins@localhost"
+                    git commit -am "Update image to ${IMAGE_NAME}:${BUILD_NUMBER}"
+                    git push
+                    '''
+                }
+            }
+        }
+    }
+}
