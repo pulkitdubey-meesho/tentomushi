@@ -1,7 +1,10 @@
 pipeline {
-     agent {
-        label ‘main-host’
-   }
+    agent {
+        docker {
+            image 'docker:24.0.7-dind'
+            args '--privileged -v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
     environment {
         IMAGE_NAME = "localhost:5000/tentomushi-frontend"
@@ -10,6 +13,14 @@ pipeline {
     }
 
     stages {
+        stage('Prepare Environment') {
+            steps {
+                sh '''
+                apk add --no-cache git openssh-client
+                '''
+            }
+        }
+        
         stage('Checkout') {
             steps {
                 git url: 'https://github.com/pulkitdubey-meesho/tentomushi.git', branch: "${BRANCH}"
