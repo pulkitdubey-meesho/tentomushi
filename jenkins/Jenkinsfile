@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "localhost:5000/tentomushi-frontend"
-        DEPLOY_REPO = "git@github.com:youruser/tentomushi-deploy.git"
+        DEPLOY_REPO = "https://github.com/pulkitdubey-meesho/tentomushi-deploy.git"
         BRANCH = "main"
     }
 
