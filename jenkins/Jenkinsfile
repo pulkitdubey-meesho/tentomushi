@@ -32,8 +32,7 @@ pipeline {
 
         stage('Update Manifests Repo') {
             steps {
-                sshagent(['ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIYnfiifmrwtI2yM9PZZuvISxlnfu7K5dDq6SlyJEFxi pulkit.dubey@meesho.com
-']) {
+                sshagent(['ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIYnfiifmrwtI2yM9PZZuvISxlnfu7K5dDq6SlyJEFxi pulkit.dubey@meesho.com']) {
                     sh '''
                     git clone ${DEPLOY_REPO}
                     cd tentomushi-deploy
