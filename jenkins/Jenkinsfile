@@ -40,21 +40,41 @@ pipeline {
             }
         }
 
-      stage('Update Manifests Repo') {
-    steps {        
-        sshagent(['tentomushi-ssh']) {
-            sh '''
-            git clone ${DEPLOY_REPO}
-            cd tentomushi-deploy
-            sed -i "s|image: .*|image: ${IMAGE_NAME}:${BUILD_NUMBER}|" manifests/deployment.yaml
-            git config user.name "Jenkins"
-            git config user.email "jenkins@localhost"
-            git commit -am "Update image to ${IMAGE_NAME}:${BUILD_NUMBER}"
-            git push
-            '''
+              stage('Update Manifests Repo') {
+            steps {
+                sh '''
+                # Setup SSH key
+                mkdir -p ~/.ssh
+                cat > ~/.ssh/id_ed25519 << 'EOF'
+-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
+QyNTUxOQAAACAci8dDRep7+DzO7L7MSMFDFabNAASckNTU0dCKbHIB0wAAAKCAbpf+gG6X
+/gAAAAtzc2gtZWQyNTUxOQAAACAci8dDRep7+DzO7L7MSMFDFabNAASckNTU0dCKbHIB0w
+AAAEAHW4+Z0lOaR8ZWaioTJP0LbSYPCRbb6poK8BPzvnsLgxyLx0NF6nv4PM7svsxIwUMV
+ps0ABJyQ1NTR0IpscgHTAAAAF3B1bGtpdC5kdWJleUBtZWVzaG8uY29tAQIDBAUG
+-----END OPENSSH PRIVATE KEY-----
+EOF
+                chmod 600 ~/.ssh/id_ed25519
+                ssh-keyscan github.com >> ~/.ssh/known_hosts
+                
+                # Configure SSH to use the key
+                echo "Host github.com" >> ~/.ssh/config
+                echo "  HostName github.com" >> ~/.ssh/config
+                echo "  User git" >> ~/.ssh/config
+                echo "  IdentityFile ~/.ssh/id_ed25519" >> ~/.ssh/config
+                chmod 600 ~/.ssh/config
+                
+                # Clone and update repository
+                git clone ${DEPLOY_REPO}
+                cd tentomushi-deploy
+                sed -i "s|image: .*|image: ${IMAGE_NAME}:${BUILD_NUMBER}|" manifests/deployment.yaml
+                git config user.name "Jenkins"
+                git config user.email "jenkins@localhost"
+                git commit -am "Update image to ${IMAGE_NAME}:${BUILD_NUMBER}"
+                git push
+                '''
+            }
         }
-    }
-}
 
     }
 }
