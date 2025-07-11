@@ -5,6 +5,8 @@ pipeline {
         IMAGE_NAME = "localhost:5000/tentomushi-frontend"
         DEPLOY_REPO = "https://github.com/pulkitdubey-meesho/tentomushi-deploy.git"
         BRANCH = "main"
+        DEPLOY_REPO = "git@github.com:pulkitdubey-meesho/tentomushi-deploy.git"
+
     }
 
     stages {
@@ -40,19 +42,20 @@ pipeline {
         }
 
         stage('Update Manifests Repo') {
-            steps {
-                sshagent(['ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIYnfiifmrwtI2yM9PZZuvISxlnfu7K5dDq6SlyJEFxi pulkit.dubey@meesho.com']) {
-                    sh '''
-                    git clone ${DEPLOY_REPO}
-                    cd tentomushi-deploy
-                    sed -i "s|image: .*|image: ${IMAGE_NAME}:${BUILD_NUMBER}|" manifests/deployment.yaml
-                    git config user.name "Jenkins"
-                    git config user.email "jenkins@localhost"
-                    git commit -am "Update image to ${IMAGE_NAME}:${BUILD_NUMBER}"
-                    git push
-                    '''
-                }
-            }
+    steps {
+        sshagent(['tentomushi-ssh']) {
+            sh '''
+            git clone ${DEPLOY_REPO}
+            cd tentomushi-deploy
+            sed -i "s|image: .*|image: ${IMAGE_NAME}:${BUILD_NUMBER}|" manifests/deployment.yaml
+            git config user.name "Jenkins"
+            git config user.email "jenkins@localhost"
+            git commit -am "Update image to ${IMAGE_NAME}:${BUILD_NUMBER}"
+            git push
+            '''
         }
+    }
+}
+
     }
 }
