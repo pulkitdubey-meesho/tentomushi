@@ -41,20 +41,23 @@ pipeline {
         }
 
         stage('Update Manifests Repo') {
-    steps {
-        sshagent(['tentomushi-ssh']) {
-            sh '''
-            git clone ${DEPLOY_REPO}
-            cd tentomushi-deploy
-            sed -i "s|image: .*|image: ${IMAGE_NAME}:${BUILD_NUMBER}|" manifests/deployment.yaml
-            git config user.name "Jenkins"
-            git config user.email "jenkins@localhost"
-            git commit -am "Update image to ${IMAGE_NAME}:${BUILD_NUMBER}"
-            git push
-            '''
+            steps {
+                sshagent(['b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
+QyNTUxOQAAACATA3plItkaEKa/RIbnEc9VS3BpTrkWfsExny5Rnx92cgAAAJiGjmJTho5i
+UwAAAAtzc2gtZWQyNTUxOQAAACATA3plItkaEKa/RIbnEc9VS3BpTrkWfsExny5Rnx92cg
+AAAED5TF/CxbeF1iPFt+SwwFettQe82YU8x70/ljCCrRci8RMDemUi2RoQpr9EhucRz1VL
+cGlOuRZ+wTGfLlGfH3ZyAAAAEWplbmtpbnNAbG9jYWxob3N0AQIDBA==']) {
+                    sh '''
+                    git clone ${DEPLOY_REPO}
+                    cd tentomushi-deploy
+                    sed -i "s|image: .*|image: ${IMAGE_NAME}:${BUILD_NUMBER}|" manifests/deployment.yaml
+                    git config user.name "Jenkins"
+                    git config user.email "jenkins@localhost"
+                    git commit -am "Update image to ${IMAGE_NAME}:${BUILD_NUMBER}"
+                    git push
+                    '''
+                }
+            }
         }
-    }
-}
-
     }
 }
